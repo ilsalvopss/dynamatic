@@ -152,13 +152,15 @@ exit_on_fail "Failed to compile to LLVM IR" \
 # way to ignore it
 # - Clang always adds "noinline" to the IR.
 # ------------------------------------------------------------------------------
-sed -i "s/optnone//g" "$F_CLANG"
-sed -i "s/noinline//g" "$F_CLANG"
-
 # Strip information that we don't care (and mlir-translate also doesn't know how
-# to handle it).
-sed -i "s/^target datalayout = .*$//g" "$F_CLANG"
-sed -i "s/^target triple = .*$//g" "$F_CLANG"
+# to handle it). The backup suffix works with both BSD and GNU sed.
+sed -i.bak \
+  -e "s/optnone//g" \
+  -e "s/noinline//g" \
+  -e "s/^target datalayout = .*$//g" \
+  -e "s/^target triple = .*$//g" \
+  "$F_CLANG"
+rm -f "$F_CLANG.bak"
 
 # ------------------------------------------------------------------------------
 # NOTE:

@@ -175,26 +175,34 @@ InternalStateNamer::tryConstrain(int32_t value) const {
 bool fromJSON(const llvm::json::Value &value, EagerForkSentNamer &namer,
               llvm::json::Path path) {
   llvm::json::ObjectMapper mapper(value, path);
-  return mapper &&
-         mapper.map(EagerForkSentNamer::OPERATION_LIT, namer.opName) &&
-         mapper.map(EagerForkSentNamer::CHANNEL_NAME_LIT, namer.channelName) &&
-         mapper.map(EagerForkSentNamer::CHANNEL_SIZE_LIT, namer.channelSize);
+  uint64_t channelSize;
+  if (!mapper ||
+      !mapper.map(EagerForkSentNamer::OPERATION_LIT, namer.opName) ||
+      !mapper.map(EagerForkSentNamer::CHANNEL_NAME_LIT, namer.channelName) ||
+      !mapper.map(EagerForkSentNamer::CHANNEL_SIZE_LIT, channelSize))
+    return false;
+  namer.channelSize = static_cast<size_t>(channelSize);
+  return true;
+}
+
+bool fromJSON(const llvm::json::Value &value, BufferSlotFullNamer &namer,
+              llvm::json::Path path) {
+  llvm::json::ObjectMapper mapper(value, path);
+  uint64_t slotSize;
+  if (!mapper ||
+      !mapper.map(BufferSlotFullNamer::OPERATION_LIT, namer.opName) ||
+      !mapper.map(BufferSlotFullNamer::SLOT_NAME_LIT, namer.slotName) ||
+      !mapper.map(BufferSlotFullNamer::DATA_NAME_LIT, namer.dataName) ||
+      !mapper.map(BufferSlotFullNamer::SLOT_SIZE_LIT, slotSize))
+    return false;
+  namer.slotSize = static_cast<size_t>(slotSize);
+  return true;
 }
 
 ConstrainedEagerForkSentNamer
 EagerForkSentNamer::constrain(int32_t value) const {
   ConstrainedEagerForkSentNamer p(*this, value);
   return p;
-}
-
-bool fromJSON(const llvm::json::Value &value, BufferSlotFullNamer &namer,
-              llvm::json::Path path) {
-  llvm::json::ObjectMapper mapper(value, path);
-  return mapper &&
-         mapper.map(BufferSlotFullNamer::OPERATION_LIT, namer.opName) &&
-         mapper.map(BufferSlotFullNamer::SLOT_NAME_LIT, namer.slotName) &&
-         mapper.map(BufferSlotFullNamer::DATA_NAME_LIT, namer.dataName) &&
-         mapper.map(BufferSlotFullNamer::SLOT_SIZE_LIT, namer.slotSize);
 }
 
 ConstrainedBufferSlotFullNamer
@@ -244,12 +252,14 @@ bool fromJSON(const llvm::json::Value &value, MemoryControllerSlotNamer &namer,
               llvm::json::Path path) {
   llvm::json::ObjectMapper mapper(value, path);
   int t;
+  uint64_t slotIndex;
   if (!mapper ||
       !mapper.map(MemoryControllerSlotNamer::OPERATION_LIT, namer.opName) ||
-      !mapper.map(MemoryControllerSlotNamer::SLOT_INDEX_LIT, namer.slotIndex) ||
+      !mapper.map(MemoryControllerSlotNamer::SLOT_INDEX_LIT, slotIndex) ||
       !mapper.map(MemoryControllerSlotNamer::PORT_TYPE_LIT, t) ||
       !mapper.map(MemoryControllerSlotNamer::LOADLESS_LIT, namer.loadless))
     return false;
+  namer.slotIndex = static_cast<size_t>(slotIndex);
   namer.portType = (MemoryControllerSlotNamer::PortType)t;
   return true;
 }

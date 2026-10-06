@@ -15,7 +15,7 @@ IndexTokenTracker::IndexTokenTracker(size_t numValues) {
 IndexTokenTracker IndexTokenTracker::fromJSON(const llvm::json::Value &value,
                                               llvm::json::Path path) {
   llvm::json::ObjectMapper mapper(value, path);
-  unsigned long x;
+  uint64_t x;
   if (!mapper || !mapper.map(TRACKED_VALUES_LIT, x)) {
     llvm::report_fatal_error("json parsing of Token Tracker failed");
   }

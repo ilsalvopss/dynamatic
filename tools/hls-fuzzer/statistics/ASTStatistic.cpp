@@ -254,11 +254,13 @@ llvm::json::Value ASTStatistic::toJSON() const {
 bool ASTStatistic::fromJSON(const llvm::json::Value &value,
                             llvm::json::Path path) {
   std::map<std::string, double> averages;
+  uint64_t parsedNumSamples;
   llvm::json::ObjectMapper mapper(value, path);
-  if (!mapper || !mapper.map("numSamples", numSamples) ||
+  if (!mapper || !mapper.map("numSamples", parsedNumSamples) ||
       !mapper.map("averages", averages))
     return false;
 
+  numSamples = static_cast<size_t>(parsedNumSamples);
   counts.clear();
   for (const auto &[name, average] : averages) {
     const NodeKey *key = lookupKey(name);
